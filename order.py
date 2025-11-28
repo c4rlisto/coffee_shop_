@@ -1,46 +1,55 @@
+# order.py
+
+from typing import List
 from customer import Customer
 from coffee import Coffee
 
-class order:
-    all = []
+class Order:
+    _all_orders: List["Order"] = []
 
-    def __init__(self, costomer, coffee, price):
-        self.costomer = price
-        self.coffee = coffee
+    def __init__(self, customer: Customer, coffee: Coffee, price: float):
+        # validate types
+        if not isinstance(customer, Customer):
+            raise TypeError("customer must be a Customer instance.")
+        if not isinstance(coffee, Coffee):
+            raise TypeError("coffee must be a Coffee instance.")
+
+        # use property setters for price validation
+        self._customer = customer
+        self._coffee = coffee
         self.price = price
-        order.all.append(self)
 
+        Order._all_orders.append(self)
+
+    def __repr__(self):
+        return f"Order(customer={self.customer!r}, coffee={self.coffee!r}, price={self.price:.2f})"
+
+    # class access to all orders
+    @classmethod
+    def all_orders(cls) -> List["Order"]:
+        return list(cls._all_orders)
+
+    # customer property (read only)
     @property
-    def customer(self):
+    def customer(self) -> Customer:
         return self._customer
-    
 
-    @customer.setter
-    def customer(self, value):
-        if not isinstance(value,  Customer):
-            raise Exception("Order.customer must be a Customer instance")
-        self._customer = value
-
-
+    # coffee property (read only)
     @property
-    def coffee(self):
+    def coffee(self) -> Coffee:
         return self._coffee
-    
-    @coffee.setter
-    def coffee(self, value):
-        if not isinstance(value,Coffee):
-            raise Exception("Order.coffee must be a coffee instance")
-        self._coffee = value
 
-
+    # price property with validation: float between 1.0 and 10.0 inclusive
     @property
-    def price(self):
+    def price(self) -> float:
         return self._price
-    
+
     @price.setter
     def price(self, value):
-        if not isinstance(value, ( int, float)):
-            raise Exception("Price must be a number")
-        if not (1.0 <= float(value) <= 10.0):
-            raise Exception("Price must be between 1.0 and 10.0")
-        self._price = float(value)
+        try:
+            val = float(value)
+        except (TypeError, ValueError):
+            raise TypeError("price must be a number (float).")
+        if val < 1.0 or val > 10.0:
+            raise ValueError("price must be between 1.0 and 10.0 inclusive.")
+        self._price = val
